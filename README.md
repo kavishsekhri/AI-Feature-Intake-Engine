@@ -85,7 +85,7 @@ This step prevents deterministic AI behavior from pushing bad specs downstream.
 
 ## Demo
 🎥 Watch the full workflow demo on Loom:  
-👉 https://www.loom.com/share/YOUR_VIDEO_ID
+👉 [https://www.loom.com/share/YOUR_VIDEO_ID](https://www.loom.com/share/dfac4237b23d4684941629f1f5b55095)
 
 🎥 The walkthrough shows:
 - End-to-end workflow execution  
