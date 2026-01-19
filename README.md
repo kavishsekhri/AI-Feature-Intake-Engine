@@ -161,6 +161,20 @@ This is **decision acceleration**, not task automation.
 
 ---
 
+## Setup Notes
+
+Use AI Feature Intake Engine.json file to get started with n8n workflow template.
+This workflow uses environment variables and n8n credentials.
+Before importing:
+
+- Configure Gemini / LLM and JIRA API credentials in n8n
+- Configure Google Sheets, Drive, and Gmail credentials in n8n
+- Set required environment variables:
+  - N8N_BASE_URL
+- Update webhook URLs after import
+
+---
+
 ## 💼 Need Help Getting Started?
 
 Setting up the **AI-Feature-Intake-Engine** can be complex. I offer personalized setup sessions to help you get up and running quickly.
