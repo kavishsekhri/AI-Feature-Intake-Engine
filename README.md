@@ -1,20 +1,59 @@
-# AI Feature Intake Engine  
-*n8n + Google Sheets (Trigger) + Google Drive + Gemini AI + Jira*
-
-## Overview
-This project is an **AI-powered Feature Intake Engine** that converts user product requests into **reviewable, structured Jira-ready tickets**, with a **human-in-the-loop approval step**.
-
-It is designed for Product, Engineering, and TPM teams who want speed **without losing control**.
+# 🚀 AI Feature Intake Engine  
+**Turn raw product requests into Jira-ready stories in under 1 minute, with humans in control**
 
 ---
 
-## What this solves
-- Users or POs write messy feature ideas  
-- AI turns them into structured technical specs after reviewing internal documents  
-- Humans review, edit, approve or reject  
-- Only approved specs reach Jira  
+## ❌ The Problem
 
-No hallucinated tickets. No blind automation.
+Great product ideas fail every day. Not because they’re bad, but because they **arrive too late, too vague, or lose context** before reaching the backlog.
+
+Typical intake issues:
+- Requests come in via email, chat, docs, or forms
+- PMs and TPMs spend hours rewriting and clarifying
+- Context gets lost between stakeholders
+- By the time it reaches Jira, urgency is gone
+- Engineers get half-baked tickets → rework and delays
+
+**Speed without control is dangerous.  
+Control without speed is expensive.**
+
+---
+
+## ✅ The Solution
+
+The **AI Feature Intake Engine** accelerates product request review **without removing human judgment**.
+
+In under **60 seconds**, it:
+- Summarizes incoming requests
+- Breaks them into Jira-ready technical tasks
+- Surfaces ambiguities early
+- Requires explicit human approval before action
+
+AI does the heavy lifting.  
+Humans make the decision.
+
+---
+
+## 🧠 How It Works (High Level)
+
+1. **Request arrives**  
+   From Google Sheets, form, or intake source
+
+2. **AI enrichment**  
+   Gemini studies internal product features and architecture and converts raw input into:
+   - Architectural summary
+   - Clear technical sub-tasks
+
+3. **Human-in-the-loop review**  
+   Reviewer:
+   - Reads a clean, readable summary
+   - Approves or rejects explicitly (no auto-creation)
+
+4. **Outcome**
+   - ✅ Approved → Jira-ready payload
+   - ❌ Rejected → Context-aware rejection email
+
+All of this happens **before backlog pollution**.
 
 ---
 
@@ -56,57 +95,69 @@ This step prevents deterministic AI behavior from pushing bad specs downstream.
 - If rejected → Send rejection email with feedback to the requester 
 - Fully auditable and reversible
 
----
-
-## Key Design Principles
-- **Schema-first AI handling**  
-  Gemini output is normalized and flattened before use.
-
-- **Non-deterministic AI, deterministic system**  
-  AI can vary. The workflow cannot.
-
-- **Human control at the right moment**  
-  Review happens before Jira, not after.
-
-- **Separation of concerns**  
-  Generation, review, and execution are decoupled.
+No brittle automation.  
+No blind Jira creation.  
+No black-box AI behavior.
 
 ---
 
-## Tech Stack
-- **n8n** – Workflow orchestration  
-- **Google Gemini** – AI spec generation  
-- **Google Sheets** – Intake source
-- **Google Drive** – Internal document repository
-- **Jira** – Execution system  
-- **HTML + Webhooks** – Review UI  
+## 🎯 Why This Matters (TPM / Technical PM Perspective)
+
+From a delivery standpoint:
+- Late or unclear requests create downstream chaos
+- Engineers lose trust in product signals
+- Backlogs fill with low-quality tickets
+- Roadmaps drift due to rework
+
+This engine **pulls quality forward**:
+- Faster intake ≠ rushed decisions
+- Context preserved at the point of review
+- Clear ownership before Jira is touched
+- Fewer surprises during delivery
+
+This is **decision acceleration**, not task automation.
 
 ---
+
+## ⏱️ Real Impact
+
+- ⏳ Intake review time: **Hours → < 1 minute**
+- 📉 Rework caused by unclear tickets: **Significantly reduced**
+- 🧠 Human oversight: **100% preserved**
+- ⚙️ Jira hygiene: **Protected**
+
+---
+
+## 🛠️ Built With
+
+- **n8n** — workflow orchestration
+- **Gemini** — structured AI summarization
+- **Google Sheets** — lightweight intake source
+- **Google Drive** — document repository
+- **Jira** — final system of record
+- **Strict JSON schemas** — deterministic AI output
+- **HTML-based review UI** — no stray JSON, no confusion
+
+---
+
 
 ## Demo
 🎥 Watch the full workflow demo on Loom:  
 👉 [https://www.loom.com/share/YOUR_VIDEO_ID](https://www.loom.com/share/dfac4237b23d4684941629f1f5b55095)
 
 🎥 The walkthrough shows:
-- End-to-end workflow execution  
-- AI generation  
-- Review & approval flow  
-- Jira ticket creation  
-
+- Intake → AI processing
+- Human approval step
+- Jira-ready output
+  
 ---
+## 👤 Who This Is For
 
-## Who this is for
-- Product Managers  
-- Technical Program Managers  
-- Engineering Leads  
-- Teams experimenting with AI safely in production workflows  
-
----
-
-## Why this matters
-This is not “AI replacing PMs.”
-
-This is **AI doing the boring 80%**, while humans keep ownership of decisions.
+- Technical Product Managers
+- TPMs / Delivery Leads
+- Startup founders handling high request volume
+- Teams tired of backlog chaos
+- Anyone who wants **AI speed without losing control**
 
 ---
 
@@ -128,5 +179,5 @@ Comprehensive setup assistance, configuration, and Q&A.
 - ✅ One-on-one video consultation  
 - ✅ Personalized setup assistance for your team  
 - ✅ Configuration guidance for your specific use case  
-- ✅ Live Q&A  
+- ✅ Q&A  
 - ✅ Follow-up support via email  
