@@ -142,8 +142,8 @@ This is **decision acceleration**, not task automation.
 
 
 ## Demo
-🎥 Watch the full workflow demo on Loom:  
-👉 [https://www.loom.com/share/YOUR_VIDEO_ID](https://www.loom.com/share/dfac4237b23d4684941629f1f5b55095)
+🎥 Watch the full workflow demo on Youtube:  
+👉 https://youtu.be/bt-PUd4Po6g
 
 🎥 The walkthrough shows:
 - Intake → AI processing
