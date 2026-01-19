@@ -1,0 +1,551 @@
+{
+  "name": "AI Feature Intake Engine",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "Replace with sheet ID",
+          "mode": "list",
+          "cachedResultName": "Google Sheet Name",
+          "cachedResultUrl": "Replace with sheet URL"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "Replace with sheet URL"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -96
+      ],
+      "id": ,
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": ,
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": ,
+          "mode": "list",
+          "cachedResultName": "Tech_Guidelines.pdf",
+          "cachedResultUrl": "Replace with file link on Google Drive"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        448,
+        -96
+      ],
+      "id": ,
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": ,
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        672,
+        -96
+      ],
+      "id": ,
+      "name": "Extract_Tech"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        1120,
+        -96
+      ],
+      "id": ,
+      "name": "Extract_Overview"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Persona: You are a Lead Software Architect and Senior TPM.\n\nSource 1 (Product Context): {{ $node[\"Extract_Overview\"].json.text }}\nSource 2 (Engineering Context): {{ $node[\"Extract_Tech\"].json.text }}\nUser Request: {{ $node[\"Filter Emplty Rows\"].json[\"Feature Description\"] }}\n\nTask: Decompose the User Request into a technical spec. Cross-reference against Source 1 for alignment and Source 2 for technical standards.\n\nOutput ONLY valid JSON:\n{\n  \"summary\": \"string\",\n  \"tasks\": [\"string\", \"string\", \"string\"]\n}\n\nStrict Rule: Do not include markdown code blocks (like ```json). Return ONLY the raw JSON string.\n\nCRITICAL: Return ONLY the JSON object. Do not explain. Do not say 'Here is the JSON'. Do not use markdown backticks. If you include any text other than the JSON object, the system will crash."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        1344,
+        -96
+      ],
+      "id": ,
+      "name": "Lead Developer/Architect Prompt",
+      "alwaysOutputData": false,
+      "credentials": {
+        "googlePalmApi": {
+          "id": ,
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "kavishsekhri@gmail.com",
+        "subject": "=AI Draft Ready for Review - {{ $node[\"Google Sheets Trigger\"].json[\"Project Name\"] }}",
+        "message": "=<!DOCTYPE html>\n<html>\n<body style=\"font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; color: #333;\">\n    <h2 style=\"color: #2d3748;\">🤖 New AI-Generated Jira Ticket Ready for Review</h2>\n    \n    <p>A new feature request has been processed by the AI Technical Project Manager:</p>\n    \n    <div style=\"background: #f7fafc; padding: 20px; border-left: 4px solid #667eea; border-radius: 5px; margin: 20px 0;\">\n        <strong>Project:</strong> {{ $node[\"Google Sheets Trigger\"].json[\"Project Name\"] }}<br>\n        <strong>Feature:</strong> {{ $node[\"Filter Emplty Rows\"].json[\"Feature Description\"] }}<br>\n        <strong>Status:</strong> <span style=\"color: #e53e3e; font-weight: bold;\">Awaiting Review</span>\n    </div>\n    \n    <p>Click the button below to open the review form. You will be able to edit the AI's technical summary and sub-tasks before submitting to the engineering backlog.</p>\n    \n    <div style=\"margin: 35px 0; text-align: left;\">\n        <!-- The URL below is mapped specifically to the cleaned 'summary' and 'tasks' from your Code node -->\n        <a href=\"{{N8N_BASE_URL}}?summary={{ encodeURIComponent($node['Code'].json.summary) }}&tasks={{ encodeURIComponent($node['Code'].json.tasks) }}\" \n           style=\"display: inline-block; background: #667eea; color: white; padding: 16px 36px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 6px rgba(102, 126, 234, 0.25);\">\n            📋 REVIEW & APPROVE DRAFT\n        </a>\n    </div>\n    \n    <p style=\"color: #718096; font-size: 13px; margin-top: 30px;\">\n        <b>Technical Note:</b> This link pre-fills a custom form. Changes made in the form will overwrite the AI's initial draft to ensure human-in-the-loop governance.\n    </p>\n    \n    <hr style=\"border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;\">\n    \n    <p style=\"color: #a0aec0; font-size: 11px; text-align: center;\">\n        Sent via n8n AI-TPM Orchestrator System\n    </p>\n</body>\n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1920,
+        -96
+      ],
+      "id": ,
+      "name": "Send a message",
+      "webhookId": ,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": ,
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": ,
+              "leftValue": "={{ $json[\"Project Name\"] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        -96
+      ],
+      "id": ,
+      "name": "Filter Emplty Rows"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Get the raw input\nconst input = $json;\nlet rawText = \"\";\n\n// 2. Targeted Search: Match the structure from your Gemini output\nif (input.content && input.content.parts && input.content.parts[0] && input.content.parts[0].text) {\n    // This goes exactly to: content -> parts -> 0 -> text\n    rawText = input.content.parts[0].text;\n} else {\n    // Fallback if structure changes\n    rawText = input.text || JSON.stringify(input);\n}\n\ntry {\n    // 3. Clean and Parse the JSON string\n    // This removes backticks and parses the string Gemini sent\n    const cleanString = rawText.replace(/```json|```/g, \"\").trim();\n    let parsed = JSON.parse(cleanString);\n\n    // 4. Flatten the Tasks Array into a clean String for the form\n    let tasksString = \"\";\n    if (Array.isArray(parsed.tasks)) {\n        tasksString = parsed.tasks\n            .map((t, i) => `${i + 1}. ${String(t).trim()}`)\n            .join('\\n\\n');\n    } else {\n        tasksString = String(parsed.tasks || \"\");\n    }\n\n    // 5. Output for the URL and Jira\n    return {\n        summary: (parsed.summary || \"\").substring(0, 800),\n        tasks: tasksString.substring(0, 1000),\n        full_summary: parsed.summary || \"\",\n        full_tasks: tasksString\n    };\n\n} catch (e) {\n    // Error Fallback: If parsing fails, pass raw text so you can see it in the form\n    return {\n        summary: \"AI spec found but parsing failed. See raw data in tasks.\",\n        tasks: rawText.substring(0, 1000),\n        full_summary: rawText,\n        full_tasks: e.message\n    };\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1696,
+        -96
+      ],
+      "id": ,
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "be2f5125-8946-4c4c-bf2d-ef086d354850",
+              "leftValue": "={{ $json.body.decision }}",
+              "rightValue": "=approved",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        448
+      ],
+      "id": "d2b0f0fa-09e7-4bb5-9890-9182d1553ff6",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "project": {
+          "__rl": true,
+          "value": "10100",
+          "mode": "list",
+          "cachedResultName": "Virtual Tour App2"
+        },
+        "issueType": {
+          "__rl": true,
+          "value": "10105",
+          "mode": "list",
+          "cachedResultName": "Task"
+        },
+        "summary": "={{ $json.body.summary }}",
+        "additionalFields": {
+          "description": "={{ $json.body.tasks }}"
+        }
+      },
+      "type": "n8n-nodes-base.jira",
+      "typeVersion": 1,
+      "position": [
+        448,
+        352
+      ],
+      "id": ,
+      "name": "Create an issue",
+      "credentials": {
+        "jiraSoftwareCloudApi": {
+          "id": ,
+          "name": "Jira SW Cloud account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $node[\"Google Sheets Trigger\"].json[\"Requester Email\"] }}",
+        "subject": "=Update on your request: {{ $node[\"Google Sheets Trigger\"].json[\"Project Name\"] }}",
+        "message": "After technical review, this project request was not approved for the current roadmap.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        448,
+        544
+      ],
+      "id": ",
+      "name": "Send a message1",
+      "webhookId": ,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": ,
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "review-draft",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        128
+      ],
+      "id": ,
+      "name": "Webhook",
+      "webhookId": 
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": ,
+          "mode": "list",
+          "cachedResultName": "Replace with Product Overview file name",
+          "cachedResultUrl": "Replace with file URL on Google Drive"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        896,
+        -96
+      ],
+      "id": ",
+      "name": "Download file1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": ,
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "review-draft",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        448
+      ],
+      "id": ,
+      "name": "Webhook1",
+      "webhookId": 
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Capture the data from the URL query parameters\nconst q = $json.query || {};\n\n// Use the shortened versions passed via URL\nconst summary = q.summary || '';\nconst tasks = q.tasks || '';\n\n// 2. Define your Submission URL\n// NOTE: If you are using a cloud/tunnel URL, change 'localhost:' to your public n8n URL\nconst submitWebhookUrl = '{{N8N_BASE_URL}}';\n\nconst html = `\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Review AI Draft | TPM Orchestrator</title>\n    <style>\n        body {\n            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;\n            background-color: #f0f2f5;\n            color: #1a202c;\n            line-height: 1.6;\n            padding: 20px;\n        }\n\n        .container {\n            max-width: 900px;\n            margin: 0 auto;\n            background: #ffffff;\n            padding: 40px;\n            border-radius: 12px;\n            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);\n        }\n\n        h2 {\n            color: #2d3748;\n            border-bottom: 2px solid #edf2f7;\n            padding-bottom: 10px;\n            margin-top: 0;\n        }\n\n        p {\n            color: #718096;\n            font-size: 0.9rem;\n            margin-bottom: 25px;\n        }\n\n        label {\n            display: block;\n            font-weight: 700;\n            margin-bottom: 8px;\n            color: #4a5568;\n            font-size: 0.95rem;\n        }\n\n        textarea {\n            width: 100%;\n            padding: 14px;\n            border: 1px solid #cbd5e0;\n            border-radius: 8px;\n            font-size: 14px;\n            font-family: inherit;\n            resize: vertical;\n            box-sizing: border-box;\n            margin-bottom: 24px;\n            background-color: #f8fafc;\n        }\n\n        textarea:focus {\n            outline: none;\n            border-color: #667eea;\n            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);\n        }\n\n        /* Larger text areas */\n        #summary {\n            min-height: 220px;\n        }\n\n        #tasks {\n            min-height: 360px;\n        }\n\n        .decision-box {\n            background: #f8fafc;\n            padding: 20px;\n            border-radius: 8px;\n            border: 1px solid #edf2f7;\n            margin-bottom: 30px;\n        }\n\n        .radio-group {\n            display: flex;\n            gap: 20px;\n            margin-top: 12px;\n        }\n\n        .radio-option {\n            display: flex;\n            align-items: center;\n            gap: 10px;\n            background: #ffffff;\n            padding: 14px 20px;\n            border-radius: 6px;\n            border: 1px solid #cbd5e0;\n            cursor: pointer;\n            transition: all 0.2s;\n            font-weight: 600;\n        }\n\n        .radio-option:hover {\n            border-color: #667eea;\n            background: #edf2ff;\n        }\n\n        .radio-option input {\n            cursor: pointer;\n        }\n\n        #rejection-container {\n            display: none;\n            margin-top: 20px;\n        }\n\n        button {\n            width: 100%;\n            padding: 16px;\n            background-color: #667eea;\n            color: white;\n            border: none;\n            border-radius: 8px;\n            font-size: 16px;\n            font-weight: bold;\n            cursor: pointer;\n            transition: background 0.2s;\n        }\n\n        button:hover {\n            background-color: #5a67d8;\n        }\n    </style>\n</head>\n<body>\n    <div class=\"container\">\n        <h2>📋 Review Jira Draft</h2>\n        <p>\n            Edit the summary and tasks below. These changes will be sent directly\n            to the Jira backlog upon approval.\n        </p>\n\n        <form method=\"POST\" action=\"${submitWebhookUrl}\">\n            \n            <label for=\"summary\">Architectural Summary</label>\n            <textarea id=\"summary\" name=\"summary\" required>${summary}</textarea>\n\n            <label for=\"tasks\">Technical Sub-tasks</label>\n            <textarea id=\"tasks\" name=\"tasks\" required>${tasks}</textarea>\n\n            <div class=\"decision-box\">\n                <label>Final Decision</label>\n\n                <div class=\"radio-group\">\n                    <label class=\"radio-option\">\n                        <input\n                            type=\"radio\"\n                            name=\"decision\"\n                            value=\"approved\"\n                            required\n                            onclick=\"toggleRejection(false)\"\n                        />\n                        ✅ Approve\n                    </label>\n\n                    <label class=\"radio-option\">\n                        <input\n                            type=\"radio\"\n                            name=\"decision\"\n                            value=\"rejected\"\n                            required\n                            onclick=\"toggleRejection(true)\"\n                        />\n                        ❌ Reject\n                    </label>\n                </div>\n\n                <div id=\"rejection-container\">\n                    <label for=\"rejectionReason\">Reason for Rejection</label>\n                    <textarea\n                        id=\"rejectionReason\"\n                        name=\"rejectionReason\"\n                        rows=\"4\"\n                        placeholder=\"Explain why this request was rejected...\"\n                    ></textarea>\n                </div>\n            </div>\n\n            <button type=\"submit\">Submit to Jira Backlog</button>\n        </form>\n    </div>\n\n    <script>\n        function toggleRejection(show) {\n            const container = document.getElementById('rejection-container');\n            const reason = document.getElementById('rejectionReason');\n\n            container.style.display = show ? 'block' : 'none';\n\n            if (show) {\n                reason.setAttribute('required', 'required');\n            } else {\n                reason.removeAttribute('required');\n                reason.value = '';\n            }\n        }\n    </script>\n</body>\n</html>\n`;\n\nreturn [\n  {\n    json: {\n      html\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        128
+      ],
+      "id": ,
+      "name": "Generate and Respond with Form"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $node[\"Generate and Respond with Form\"].json.html }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html; charset=utf-8"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        432,
+        128
+      ],
+      "id": ,
+      "name": "Respond to Webhook",
+      "alwaysOutputData": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Filter Emplty Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract_Tech",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract_Tech": {
+      "main": [
+        [
+          {
+            "node": "Download file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract_Overview": {
+      "main": [
+        [
+          {
+            "node": "Lead Developer/Architect Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lead Developer/Architect Prompt": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Emplty Rows": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        []
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Create an issue",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Generate and Respond with Form",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file1": {
+      "main": [
+        [
+          {
+            "node": "Extract_Overview",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate and Respond with Form": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d2797723-34ab-4eb9-b168-84ed1eccd714",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "43b619f1067d76deec4c767f9a29e2217d47fa159b8bcd6798229072f7e15ff5"
+  },
+  "id": "6b5REv358MPpxsdk",
+  "tags": []
+}
